@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgroRiesgo · Estimador de Pérdidas Agrícolas</title>
+
+  <!-- Leaflet CSS (mapa) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Leaflet Draw (dibujar polígonos) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-left">
+      <span class="logo-icon">🛰️</span>
+      <div>
+        <h1 class="logo-title">AgroRiesgo</h1>
+        <p class="logo-sub">Estimador satelital de pérdidas · Chile</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="status-pill" id="status-pill">
+        <span class="status-dot"></span>
+        <span id="status-text">Conectando...</span>
+      </div>
+      <div class="price-ticker" id="price-ticker">Cargando precios...</div>
+    </div>
+  </header>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <button class="tool-btn active" id="btn-draw" title="Dibujar zona">
+      ✏️ Dibujar zona
+    </button>
+    <button class="tool-btn" id="btn-clear" title="Limpiar zonas">
+      🗑️ Limpiar
+    </button>
+    <select class="tool-select" id="cultivo-select">
+      <option value="trigo">🌾 Trigo</option>
+      <option value="maiz">🌽 Maíz</option>
+      <option value="vid">🍇 Vid</option>
+      <option value="papa">🥔 Papa</option>
+      <option value="tomate">🍅 Tomate</option>
+      <option value="cebolla">🧅 Cebolla</option>
+      <option value="lechuga">🥬 Lechuga</option>
+    </select>
+    <select class="tool-select" id="layer-select">
+      <option value="ndvi">🟢 NDVI (vegetación)</option>
+      <option value="ndwi">🔵 NDWI (humedad)</option>
+      <option value="rgb">🗺️ Satélite RGB</option>
+    </select>
+    <button class="tool-btn primary" id="btn-analyze">
+      🔍 Analizar zona
+    </button>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-layout">
+
+    <!-- MAPA -->
+    <div class="map-container">
+      <div id="map"></div>
+      <div class="map-legend" id="map-legend">
+        <div class="legend-title">NDVI</div>
+        <div class="legend-scale">
+          <div class="legend-bar ndvi-bar"></div>
+          <div class="legend-labels">
+            <span>-1</span><span>0</span><span>+1</span>
+          </div>
+        </div>
+      </div>
+      <!-- Tooltip flotante en el mapa -->
+      <div class="map-tooltip" id="map-tooltip" style="display:none"></div>
+    </div>
+
+    <!-- PANEL LATERAL -->
+    <aside class="side-panel">
+
+      <!-- Sin selección -->
+      <div class="panel-empty" id="panel-empty">
+        <div class="empty-icon">🗺️</div>
+        <p>Dibuja un polígono sobre el mapa para analizar una zona agrícola</p>
+        <small>Usa el botón <strong>✏️ Dibujar zona</strong> y traza el perímetro del campo</small>
+      </div>
+
+      <!-- Resultados -->
+      <div class="panel-results" id="panel-results" style="display:none">
+
+        <!-- Indicador de zona -->
+        <div class="zone-header">
+          <div class="zone-badge" id="zone-badge">Zona A</div>
+          <div class="risk-badge" id="risk-badge">–</div>
+        </div>
+
+        <!-- Tarjetas principales -->
+        <div class="cards-grid">
+          <div class="card card-loss">
+            <div class="card-label">Pérdida potencial</div>
+            <div class="card-value" id="val-perdida-potencial">–</div>
+            <div class="card-sub">CLP estimado</div>
+          </div>
+          <div class="card card-avoided">
+            <div class="card-label">Pérdida evitada</div>
+            <div class="card-value" id="val-perdida-evitada">–</div>
+            <div class="card-sub">con acción inmediata</div>
+          </div>
+          <div class="card card-riego">
+            <div class="card-label">Costo de riego</div>
+            <div class="card-value" id="val-costo-riego">–</div>
+            <div class="card-sub">estimado por ciclo</div>
+          </div>
+          <div class="card card-merma">
+            <div class="card-label">Merma estimada</div>
+            <div class="card-value" id="val-merma">–</div>
+            <div class="card-sub">% de producción</div>
+          </div>
+        </div>
+
+        <!-- Índices satelitales -->
+        <div class="section-title">📡 Índices Satelitales</div>
+        <div class="indices-grid">
+          <div class="index-card">
+            <div class="index-label">NDVI Actual</div>
+            <div class="index-bar-wrap">
+              <div class="index-bar ndvi-actual-bar" id="bar-ndvi-actual"></div>
+            </div>
+            <div class="index-value" id="val-ndvi-actual">–</div>
+          </div>
+          <div class="index-card">
+            <div class="index-label">NDVI Histórico</div>
+            <div class="index-bar-wrap">
+              <div class="index-bar ndvi-hist-bar" id="bar-ndvi-hist"></div>
+            </div>
+            <div class="index-value" id="val-ndvi-historico">–</div>
+          </div>
+          <div class="index-card">
+            <div class="index-label">NDWI Actual</div>
+            <div class="index-bar-wrap">
+              <div class="index-bar ndwi-actual-bar" id="bar-ndwi-actual"></div>
+            </div>
+            <div class="index-value" id="val-ndwi-actual">–</div>
+          </div>
+          <div class="index-card">
+            <div class="index-label">NDWI Histórico</div>
+            <div class="index-bar-wrap">
+              <div class="index-bar ndwi-hist-bar" id="bar-ndwi-hist"></div>
+            </div>
+            <div class="index-value" id="val-ndwi-historico">–</div>
+          </div>
+        </div>
+
+        <!-- Recomendación -->
+        <div class="section-title">💡 Recomendación</div>
+        <div class="recommendation-box" id="recommendation-box">–</div>
+
+        <!-- Disclaimer -->
+        <div class="disclaimer">
+          ⚠️ Estos son valores <strong>estimados</strong> generados a partir de índices satelitales y precios de mercado. No reemplazan análisis agronómicos profesionales.
+        </div>
+
+        <!-- Botón exportar -->
+        <button class="export-btn" id="btn-export">📋 Copiar resumen</button>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- LOADING OVERLAY -->
+  <div class="loading-overlay" id="loading-overlay" style="display:none">
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p id="loading-text">Consultando datos satelitales...</p>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+  <script src="precios.js"></script>
+  <script src="gee.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
