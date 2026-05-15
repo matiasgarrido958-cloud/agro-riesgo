@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AgroMap Chile</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&amp;family=DM+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" crossorigin="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" crossorigin="">
 <style>
@@ -271,6 +271,41 @@ body{display:flex;flex-direction:column}
 .leaflet-bar a:hover{color:var(--green3) !important;background:var(--bg4) !important}
 .leaflet-draw-toolbar{display:none !important}
 .leaflet-tooltip{background:var(--bg2) !important;border:1px solid var(--border) !important;color:var(--text2) !important;font-size:12px !important;border-radius:7px !important;box-shadow:none !important;padding:4px 9px !important}
+
+/* ── MODAL REPORTE TÉCNICO ── */
+#btn-reporte{display:none;width:100%;margin:10px 0 4px;padding:10px 14px;background:linear-gradient(135deg,var(--green2),#3a7a28);color:#fff;border:none;border-radius:10px;font-family:"DM Sans",sans-serif;font-size:14px;font-weight:600;cursor:pointer;text-align:left;letter-spacing:.1px;transition:background .2s;box-shadow:0 2px 10px rgba(108,183,82,.18)}
+#btn-reporte:hover{background:linear-gradient(135deg,var(--green),var(--green2))}
+#reporte-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:19000;display:none;align-items:flex-start;justify-content:center;backdrop-filter:blur(8px);overflow-y:auto;padding:28px 12px}
+#reporte-overlay.show{display:flex}
+#reporte-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;width:100%;max-width:680px;overflow:hidden;flex-shrink:0;margin:auto}
+.rpt-header{background:linear-gradient(135deg,rgba(108,183,82,.12),rgba(74,144,51,.06));border-bottom:1px solid var(--border2);padding:22px 26px 18px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.rpt-title-wrap{}
+.rpt-pretitle{font-size:11px;text-transform:uppercase;letter-spacing:1.2px;color:var(--green3);font-weight:700;margin-bottom:4px}
+.rpt-title{font-family:"Syne",sans-serif;font-size:20px;font-weight:800;color:var(--text);line-height:1.2}
+.rpt-subtitle{font-size:13px;color:var(--text2);margin-top:5px}
+.rpt-close{background:var(--bg4);border:1px solid var(--border2);color:var(--text3);width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;flex-shrink:0;transition:all .2s}
+.rpt-close:hover{border-color:var(--red);color:var(--red)}
+.rpt-body{padding:24px 26px;display:flex;flex-direction:column;gap:20px}
+.rpt-section{background:var(--bg3);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.rpt-section-header{padding:14px 18px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.rpt-section-ico{font-size:20px;flex-shrink:0}
+.rpt-section-title{font-family:"Syne",sans-serif;font-size:15px;font-weight:700;color:var(--text)}
+.rpt-section-badge{margin-left:auto;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.rpt-section-body{padding:16px 18px;display:flex;flex-direction:column;gap:14px}
+.rpt-metric{display:flex;flex-direction:column;gap:6px}
+.rpt-metric-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rpt-metric-label{font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.rpt-metric-val{font-family:"Syne",sans-serif;font-size:22px;font-weight:800}
+.rpt-explicacion{background:rgba(108,183,82,.07);border:1px solid rgba(108,183,82,.18);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--text);line-height:1.75}
+.rpt-explicacion b{color:var(--green3)}
+.rpt-explicacion.amber{background:rgba(232,169,58,.07);border-color:rgba(232,169,58,.2)}
+.rpt-explicacion.amber b{color:var(--amber)}
+.rpt-explicacion.blue{background:rgba(79,168,213,.07);border-color:rgba(79,168,213,.2)}
+.rpt-explicacion.blue b{color:var(--blue)}
+.rpt-explicacion.purple{background:rgba(181,125,224,.07);border-color:rgba(181,125,224,.2)}
+.rpt-explicacion.purple b{color:var(--purple)}
+.rpt-divider{height:1px;background:var(--border);margin:2px 0}
+.rpt-disclaimer{font-size:11px;color:var(--text3);line-height:1.6;text-align:center;padding:0 26px 22px}
 </style>
 </head>
 <body>
@@ -290,6 +325,24 @@ body{display:flex;flex-direction:column}
     </ul>
     <button class="modal-accept" id="btn-accept" onclick="document.getElementById('modal-tc').style.display='none'">✓ Acepto los Términos y Condiciones</button>
     <p class="modal-footer">Al continuar, aceptas que los datos son orientativos para planificación agrícola general.</p>
+  </div>
+</div>
+
+<!-- MODAL REPORTE TÉCNICO EXPLICATIVO -->
+<div id="reporte-overlay">
+  <div id="reporte-box">
+    <div class="rpt-header">
+      <div class="rpt-title-wrap">
+        <div class="rpt-pretitle">📋 Reporte Técnico Explicativo</div>
+        <div class="rpt-title" id="rpt-nombre-zona">—</div>
+        <div class="rpt-subtitle" id="rpt-subtitulo">—</div>
+      </div>
+      <div class="rpt-close" id="btn-reporte-close">✕</div>
+    </div>
+    <div class="rpt-body" id="rpt-body">
+      <!-- Generado dinámicamente por JS -->
+    </div>
+    <div class="rpt-disclaimer">⚠ Estimaciones estadísticas orientativas · Sentinel-2 · Open-Meteo · SoilGrids · ODEPA · Precisión ±25% · No reemplaza asesoría agronómica profesional</div>
   </div>
 </div>
 
@@ -340,6 +393,7 @@ body{display:flex;flex-direction:column}
     <div class="sb-head">
       <h2>Hoja de Ruta: Semilla → Ganancia</h2>
       <p id="sb-sub">Dibuja un polígono para analizar tu predio</p>
+      <button id="btn-reporte">📋 Ver Reporte Técnico Explicativo</button>
     </div>
     <div class="tabs-wrap" id="tabs-wrap" style="display:none">
       <div class="tabs">
@@ -501,6 +555,85 @@ function getPlagas(key){
 }
 
 // ═══════════ BUILD PANELS ═══════════
+// ═══ RECOMENDACIONES DE CULTIVO POR ZONA ═══
+function getCultivoRecomendaciones(zona){
+  var lat=zona.lat, ha=zona.ha, reg=getRegion(lat);
+  var ph=6.2;
+  var skey=lat.toFixed(2)+'_'+zona.lng.toFixed(2);
+  if(sueloCache[skey]&&sueloCache[skey].ph) ph=parseFloat(sueloCache[skey].ph);
+  var cl=climaCache[skey];
+  var tMax=cl&&cl.daily?cl.daily.temperature_2m_max[0]:25;
+  var recs=[];
+
+  // Por latitud / región
+  if(lat>-31&&lat<=-26){
+    recs.push({ico:'🥑',nombre:'Palta',razon:'Zona ideal para Hass. Clima seco y cálido con baja humedad relativa. IV Región líder nacional.',score:95});
+    recs.push({ico:'🍋',nombre:'Limón',razon:'Excelentes condiciones para cítricos en zona norte-centro.',score:88});
+    recs.push({ico:'🫛',nombre:'Garbanzo',razon:'Suelos áridos bien drenados y baja lluvia son ideales para esta legumbre.',score:82});
+    recs.push({ico:'🍇',nombre:'Uva de mesa',razon:'Valles transversales con riego. Alta insolación favorece el cuajado.',score:80});
+  } else if(lat>-34&&lat<=-31){
+    recs.push({ico:'🍇',nombre:'Uva de mesa',razon:'Valle Central norte: temperatura y seco ideal para viticultura de exportación.',score:96});
+    recs.push({ico:'🥑',nombre:'Palta',razon:'Zona de mayor producción histórica de palta Hass en Chile.',score:90});
+    recs.push({ico:'🍋',nombre:'Limón',razon:'Clima mediterráneo seco perfecto para cítricos en V Región.',score:87});
+    recs.push({ico:'🍒',nombre:'Cerezas',razon:'Precordillera con horas frío suficientes. Buen potencial en zonas altas.',score:78});
+  } else if(lat>-36&&lat<=-34){
+    recs.push({ico:'🍒',nombre:'Cerezas',razon:'VI Región: zona óptima de Chile para cerezas de exportación premium.',score:98});
+    recs.push({ico:'🍇',nombre:'Uva de mesa',razon:'Condiciones climáticas y suelos de Valle Central ideales.',score:93});
+    recs.push({ico:'🍎',nombre:'Manzana',razon:'Temperatura, suelo y humedad de la VI Región perfectos para manzana.',score:91});
+    recs.push({ico:'🍑',nombre:'Durazno',razon:'Inviernos con suficiente frío y veranos secos. Alta rentabilidad local.',score:88});
+  } else if(lat>-38&&lat<=-36){
+    recs.push({ico:'🍒',nombre:'Cerezas',razon:'VII Región es líder mundial en cerezas de exportación. Condición óptima.',score:97});
+    recs.push({ico:'🌾',nombre:'Trigo',razon:'Clima templado-húmedo y suelos profundos ideales para cereales.',score:90});
+    recs.push({ico:'🥔',nombre:'Papa',razon:'Suelos y temperatura apropiados. Alta demanda agroindustrial en la zona.',score:87});
+    recs.push({ico:'🫐',nombre:'Arándano',razon:'Transición a la zona sur con pH favorable. Buenas perspectivas de export.',score:84});
+  } else if(lat>-40&&lat<=-38){
+    recs.push({ico:'🫐',nombre:'Arándano',razon:'Lluvia y temperatura fresca ideales. IX Región con pH ácido natural.',score:94});
+    recs.push({ico:'🥔',nombre:'Papa',razon:'Zona histórica de papa en Chile. Clima frío-húmedo perfecto para tubérculos.',score:92});
+    recs.push({ico:'🌾',nombre:'Avena',razon:'Cereal muy adaptado a suelos ácidos y húmedos del sur.',score:88});
+    recs.push({ico:'🥦',nombre:'Brócoli',razon:'Frío del sur mejora calidad de crucíferas. Alta demanda en mercado fresco e IQF.',score:85});
+  } else if(lat<=-40){
+    recs.push({ico:'🥔',nombre:'Papa',razon:'Clima húmedo y fresco del sur. Zona de alta producción histórica.',score:92});
+    recs.push({ico:'🫐',nombre:'Arándano',razon:'pH ácido natural de suelos del sur. Excelente para variedades tempranas.',score:90});
+    recs.push({ico:'🌾',nombre:'Avena',razon:'Adaptada perfectamente a condiciones de X-XI Región.',score:87});
+    recs.push({ico:'🥬',nombre:'Lechuga',razon:'Temperaturas frescas y humedad producen lechugas de alta calidad.',score:83});
+  }
+
+  // Ajustes por pH del suelo
+  if(ph<5.5){
+    recs.forEach(function(r){if(r.nombre==='Arándano') r.score=Math.min(99,r.score+6);});
+    var yaHayArandano=recs.some(function(r){return r.nombre==='Arándano';});
+    if(!yaHayArandano) recs.unshift({ico:'🫐',nombre:'Arándano',razon:'⭐ pH '+ph+' detectado — suelo muy ácido, condición excepcional para arándanos.',score:96});
+  }
+  if(ph>7.2){
+    recs.forEach(function(r){if(r.nombre==='Trigo'||r.nombre==='Avena') r.score=Math.min(99,r.score+4);});
+  }
+
+  // Ajuste por tamaño del predio
+  if(ha<1){
+    recs=recs.filter(function(r){return r.nombre!=='Trigo'&&r.nombre!=='Avena'&&r.nombre!=='Papa';});
+    if(!recs.some(function(r){return r.nombre==='Ajo';}))
+      recs.push({ico:'🧄',nombre:'Ajo',razon:'Predio pequeño ideal para ajo. Alta rentabilidad por m² y buena demanda.',score:82});
+    if(!recs.some(function(r){return r.nombre==='Espinaca';}))
+      recs.push({ico:'🥗',nombre:'Espinaca',razon:'Ciclo corto y alta rotación. Ideal para predios pequeños con riego.',score:79});
+  }
+  if(ha>50){
+    recs=recs.filter(function(r){return r.nombre!=='Ajo'&&r.nombre!=='Lechuga';});
+  }
+
+  // Ajuste por temperatura máxima
+  if(tMax>32){
+    recs.forEach(function(r){if(r.nombre==='Lechuga'||r.nombre==='Espinaca') r.score=Math.max(30,r.score-20);});
+    if(!recs.some(function(r){return r.nombre==='Tomate';}))
+      recs.push({ico:'🍅',nombre:'Tomate',razon:'Temperatura alta favorece el cuajado y coloración del tomate.',score:85});
+  }
+
+  // Deduplicar y ordenar por score
+  var seen={};
+  recs=recs.filter(function(r){if(seen[r.nombre]) return false;seen[r.nombre]=true;return true;});
+  recs.sort(function(a,b){return b.score-a.score;});
+  return recs.slice(0,4);
+}
+
 function buildCampo(d,zona){
   var c=CULTIVOS[zona.cultivo]||CULTIVOS.cerezas;
   var div=mk('div','');
@@ -530,6 +663,42 @@ function buildCampo(d,zona){
   div.appendChild(progBar('Presión histórica de plagas este mes',np*100,pc));
   div.appendChild(mk('div','sep'));
   div.appendChild(recom('💡 Recomendación agronómica',d.recom));
+
+  // ── CULTIVOS RECOMENDADOS PARA LA ZONA ──────────────────────────────────
+  div.appendChild(secTitle('🌟 Cultivos Recomendados para tu Zona'));
+  var recs=getCultivoRecomendaciones(zona);
+  var recCard=card('');
+  var recHead=mk('p','');
+  recHead.style.cssText='font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.5';
+  recHead.textContent='Basado en latitud '+zona.lat.toFixed(2)+'°S · Región '+getRegion(zona.lat)+' · pH suelo estimado · Clima local:';
+  recCard.appendChild(recHead);
+  recs.forEach(function(r,i){
+    var rRow=mk('div','');
+    rRow.style.cssText='display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)';
+    if(i===recs.length-1) rRow.style.borderBottom='none';
+    var scoreColor=r.score>=90?'var(--green3)':r.score>=80?'var(--amber)':'var(--text2)';
+    // Icono + score
+    var left=mk('div','');left.style.cssText='display:flex;flex-direction:column;align-items:center;gap:3px;width:46px;flex-shrink:0';
+    var icoEl=mk('div','');icoEl.style.cssText='font-size:24px;line-height:1';icoEl.textContent=r.ico;
+    var scoreEl=mk('div','');scoreEl.style.cssText='font-size:11px;font-weight:700;color:'+scoreColor;scoreEl.textContent=r.score+'%';
+    left.appendChild(icoEl);left.appendChild(scoreEl);
+    // Info
+    var right=mk('div','');right.style.flex='1';
+    var nameEl=mk('div','');nameEl.style.cssText='font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px';nameEl.textContent=r.nombre;
+    var razonEl=mk('div','');razonEl.style.cssText='font-size:12px;color:var(--text2);line-height:1.5';razonEl.textContent=r.razon;
+    // Si es el cultivo actual, mostrar badge
+    if(r.nombre===c.nombre){
+      var actBadge=mk('span','');actBadge.style.cssText='display:inline-block;background:rgba(108,183,82,.15);border:1px solid rgba(108,183,82,.3);color:var(--green3);font-size:10px;padding:1px 7px;border-radius:10px;margin-top:4px;font-weight:600';
+      actBadge.textContent='✓ Cultivo actual';razonEl.after?razonEl.after(actBadge):right.appendChild(actBadge);
+    }
+    right.appendChild(nameEl);right.appendChild(razonEl);
+    // Medalla
+    var medal=mk('div','');medal.style.cssText='font-size:18px;flex-shrink:0;padding-top:2px';medal.textContent=['🥇','🥈','🥉','4°'][i]||'';
+    rRow.appendChild(left);rRow.appendChild(right);rRow.appendChild(medal);
+    recCard.appendChild(rRow);
+  });
+  div.appendChild(recCard);
+
   return div;
 }
 
@@ -551,7 +720,7 @@ function buildClima(d,zona){
     var wr=mk('div','wx-row');wr.appendChild(mk('span','wx-ico',r[0]));wr.appendChild(mk('span','wx-label',r[1]));wr.appendChild(mk('span','wx-val',r[2]));wc.appendChild(wr);});
   div.appendChild(wc);
   div.appendChild(secTitle('💧 Plan de Riego'));
-  var rc=card('Consumo para '+zona.ha.toFixed(1)+' ha');rc.appendChild(row('Consumo diario',rd+' m³/día','b'));rc.appendChild(row('Consumo semanal',rs+' m³/semana','b'));rc.appendChild(row('Total temporada (120 días)',clp(rt)+' m³','b'));div.appendChild(rc);
+  var rc=card('Consumo para '+zona.ha.toFixed(1)+' ha');rc.appendChild(row('Consumo diario',rd+' m\u00B3/d\u00EDa','b'));rc.appendChild(row('Consumo semanal',rs+' m\u00B3/semana','b'));rc.appendChild(row('Total temporada (120 d\u00EDas)',clp(rt)+' m\u00B3','b'));div.appendChild(rc);
   div.appendChild(alert_(zona.lat<-38?'warn':'ok',zona.lat<-38?'❄ Riesgo de heladas':'✓ Sin alto riesgo de heladas',zona.lat<-38?'Latitud '+zona.lat.toFixed(1)+'°S — riesgo de heladas tardías.':'Latitud favorable para '+c.nombre+'.'));
   div.appendChild(secTitle('⚡ Riesgo Climático Extremo'));
   div.appendChild(alert_(d.rc>60?'danger':d.rc>35?'warn':'ok',d.rc>60?'Riesgo alto':d.rc>35?'Riesgo moderado':'Riesgo bajo','Probabilidad de evento extremo esta temporada: '+d.rc+'%'));
@@ -645,7 +814,8 @@ function buildEco(d,zona){
 
   var costos=[
     {id:'c_riego',   lbl:'💧 Riego tecnificado',   val:Math.round(d.criego), checked:true,  desc:'Sistema de goteo o aspersión por temporada'},
-    {id:'c_agua',    lbl:'🪣 Costo del agua',       val:cAgua,                checked:true,  desc:'Tarifa región '+reg+' · '+clp(m3t)+' m³'},
+    {id:'c_agua',    lbl:'🪣 Costo del agua',       val:cAgua,                checked:true,  desc:'Tarifa región '+reg+' · '+clp(m3t)+' m\u00B3'},
+    {id:'c_plaga',   lbl:'🐛 Control Fitosanitario',val:Math.round(120000*zona.ha),checked:true,desc:'Prevención y manejo de '+c.plaga},
     {id:'c_n',       lbl:'🟡 Fertilizante N',       val:cN,                   checked:false, desc:c.npk.N+' kg/ha · Urea ~$620/kg'},
     {id:'c_p',       lbl:'🔴 Fertilizante P',       val:cP,                   checked:false, desc:c.npk.P+' kg/ha · Superfosfato ~$850/kg'},
     {id:'c_k',       lbl:'🟠 Fertilizante K',       val:cK,                   checked:false, desc:c.npk.K+' kg/ha · KCl ~$780/kg'},
@@ -782,7 +952,7 @@ function buildSuelo(d,zona){
   var sc=card('Análisis 0–30 cm · SoilGrids ISRIC');sc.appendChild(row('pH del suelo',String(ph),phOk?'g':'a'));sc.appendChild(row('Materia orgánica',soc+'%',soc>2?'g':'a'));sc.appendChild(row('Arcilla',clay+'%',''));sc.appendChild(row('Arena',sand+'%',''));sc.appendChild(row('Textura',tex,'b'));sc.appendChild(row('Nitrógeno disp.',clp(nitro)+' mg/kg',nitro>1500?'g':'a'));div.appendChild(sc);
   if(!phOk){var correc=ph<phId.min?'Aplica cal agrícola para subir pH. Dosis: '+Math.round((phId.min-ph)*2000*zona.ha)+' kg.':'Aplica azufre elemental para bajar pH. Dosis: '+Math.round((ph-phId.max)*1500*zona.ha)+' kg.';div.appendChild(recom('🧪 Corrección de pH recomendada',correc));}
   div.appendChild(secTitle('🌱 Reposición de Nutrientes NPK'));
-  var nc=card('Demanda para '+zona.ha.toFixed(1)+' ha de '+c.nombre);[['🟡 Nitrógeno (N)',c.npk.N],['🔴 Fósforo (P₂O₅)',c.npk.P],['🟠 Potasio (K₂O)',c.npk.K]].forEach(function(r){nc.appendChild(row(r[0]+' ('+r[1]+' kg/ha)',clp(Math.round(r[1]*zona.ha))+' kg total',''));});div.appendChild(nc);
+  var nc=card('Demanda para '+zona.ha.toFixed(1)+' ha de '+c.nombre);[['🟡 Nitrógeno (N)',c.npk.N],['🔴 Fósforo (P\u2082O\u2085)',c.npk.P],['🟠 Potasio (K\u2082O)',c.npk.K]].forEach(function(r){var rEl=mk('div','trow');rEl.appendChild(mk('span','tlbl',''));rEl.firstChild.innerHTML=r[0]+' ('+r[1]+' kg/ha)';var vEl=mk('span','tval','');vEl.textContent=clp(Math.round(r[1]*zona.ha))+' kg total';rEl.appendChild(vEl);nc.appendChild(rEl);});div.appendChild(nc);
   div.appendChild(recom('🌱 Recomendación de Fertilización','Nitrógeno en suelo: '+clp(nitro)+' mg/kg. '+(nitro<1500?'Déficit — aplica fertilizante nitrogenado. Dosis total: '+clp(Math.round(c.npk.N*zona.ha))+' kg.':'Nivel adecuado — fertilización de mantención: '+clp(Math.round(c.npk.N*zona.ha*.6))+' kg.')));
   return div;
 }
@@ -938,6 +1108,10 @@ function selectZone(id){
   document.getElementById('sb-sub').textContent=z.nombre+' - '+z.ha.toFixed(1)+' ha';
   zones.forEach(function(x){x.layer.setStyle({weight:x.id===id?3:1.5,fillOpacity:x.id===id?.25:.1});});
   document.getElementById('tabs-wrap').style.display='';
+  // Actualizar pH en barra de estado de forma inmediata
+  var keyS=z.lat.toFixed(2)+'_'+z.lng.toFixed(2);
+  var sueloZ=sueloCache[keyS]||getSueloDefault(z.lat);
+  if(sueloZ&&sueloZ.ph) document.getElementById('st-suelo').textContent=sueloZ.ph;
   renderZona(z);
 }
 window.selectZone=selectZone;
@@ -1033,8 +1207,8 @@ function openZonePopup(zid,latlng,layer){
 window.addEventListener('load',function(){
   document.getElementById('btn-accept').addEventListener('click',function(){document.getElementById('modal-tc').style.display='none';});
 
-  map=L.map('map',{center:[-34.8,-71.0],zoom:7,minZoom:5,maxZoom:17,zoomControl:true,attributionControl:false});
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(map);
+  map=L.map('map',{center:[-34.8,-71.0],zoom:7,minZoom:5,maxZoom:18,zoomControl:true,attributionControl:false});
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:17}).addTo(map);
   L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,opacity:.75,zIndex:5}).addTo(map);
   drawnItems=new L.FeatureGroup().addTo(map);
   // L.Draw.Polygon necesita que exista un drawControl en el mapa para capturar clicks
@@ -1215,9 +1389,27 @@ window.addEventListener('load',function(){
   // PRECIO
   function fetchPrecio(){
     var c=CULTIVOS[cultivoActual],mes=new Date().getMonth()+1;
-    precioActual=Math.round(c.precio_base[mes]*(1+(Math.random()*.08-.04)));
-    document.getElementById('precio-txt').textContent='$'+clp(precioActual)+'/kg';document.getElementById('st-odepa').textContent='ODEPA est.';
-    fetch('https://api.odepa.gob.cl/api/precios/detalle?codigoProducto=9001&formato=json').then(function(r){return r.ok?r.json():null;}).then(function(d){if(d&&d.precio){precioActual=d.precio;document.getElementById('precio-txt').textContent='$'+clp(precioActual)+'/kg';document.getElementById('st-odepa').textContent='ODEPA ✓';}}).catch(function(){});
+    var precioBase=Math.round(c.precio_base[mes]*(1+(Math.random()*.08-.04)));
+    precioActual=precioBase;
+    document.getElementById('precio-txt').textContent='$'+clp(precioActual)+'/kg';
+    document.getElementById('st-odepa').textContent='Precios Base';
+    fetch('https://api.odepa.gob.cl/api/precios/detalle?codigoProducto=9001&formato=json')
+      .then(function(r){return r.ok?r.json():Promise.reject('no-ok');})
+      .then(function(d){
+        if(d&&d.precio){
+          precioActual=d.precio;
+          document.getElementById('precio-txt').textContent='$'+clp(precioActual)+'/kg';
+          document.getElementById('st-odepa').textContent='ODEPA ✓';
+        } else {
+          precioActual=precioBase;
+          document.getElementById('st-odepa').textContent='ODEPA (Est. Histórica)';
+        }
+      })
+      .catch(function(){
+        precioActual=precioBase;
+        document.getElementById('precio-txt').textContent='$'+clp(precioActual)+'/kg';
+        document.getElementById('st-odepa').textContent='ODEPA (Est. Histórica)';
+      });
   }
 
   // ═══ MENÚ DE CULTIVOS ═══
@@ -1424,6 +1616,283 @@ window.addEventListener('load',function(){
 
     fetchPrecio();setInterval(fetchPrecio,5*60*1000);
   fetchClima(-34.8,-71.0);
+
+  // ═══ MODAL REPORTE TÉCNICO EXPLICATIVO ═══
+  function generarReporte(){
+    var z=zones.find(function(x){return x.id===activeZone;});
+    if(!z) return;
+    var c=CULTIVOS[z.cultivo]||CULTIVOS.cerezas;
+    var d=generarDatos(z);
+    var key=z.lat.toFixed(2)+'_'+z.lng.toFixed(2);
+    var suelo=sueloCache[key]||getSueloDefault(z.lat);
+    var cl=climaCache[key];
+    var ph=parseFloat(suelo.ph||6.2);
+    var soc=parseFloat(suelo.soc||2.1);
+    var et0n=cl&&cl.daily?parseFloat(cl.daily.et0_fao_evapotranspiration[0]):4.5;
+    var reg=getRegion(z.lat);
+    var tarifa={RM:120,IV:95,V:110,VI:105,VII:98,VIII:90,IX:85,X:80}[reg]||100;
+    var m3t=Math.round(et0n*.85*10*z.ha*120),cAgua=m3t*tarifa;
+    var costoPlaga=Math.round(120000*z.ha);
+    var criego=Math.round(d.criego||z.ha*250000);
+    var densV=densidadOverride[z.id+'_densidad']||c.densidad_semilla_default;
+    var psUnit=c.ps_unit||'kg';
+    var cantSem=Math.round(densV*z.ha);
+    var costoSem=Math.round(cantSem*(c.ps||0));
+    var totalCostos=criego+cAgua+costoPlaga+costoSem;
+    var iNeto=Math.round(d.kp*precioActual-d.perdida+d.evitada-totalCostos);
+    var roiV=totalCostos>0?iNeto/totalCostos:0;
+    var roiPor1000=totalCostos>0?Math.round((iNeto/totalCostos)*1000):0;
+    var rcls=d.riesgo==='BAJO'?'lo':d.riesgo==='MEDIO'?'med':'hi';
+    var phId=z.cultivo==='arandano'?{min:4.5,max:5.5}:{min:5.8,max:7.0},phOk=ph>=phId.min&&ph<=phId.max;
+    var plagaInfo=getPlagas(z.cultivo);
+
+    // Cabecera modal
+    document.getElementById('rpt-nombre-zona').textContent=z.nombre;
+    document.getElementById('rpt-subtitulo').textContent=c.ico+' '+c.nombre+' \u00B7 '+z.ha.toFixed(1)+' ha \u00B7 Región '+reg;
+
+    var body=document.getElementById('rpt-body');
+    body.innerHTML='';
+
+    // ── SECCIÓN 1: SUELO Y FERTILIZANTES ──
+    var s1=mk('div','rpt-section');
+    var s1h=mk('div','rpt-section-header');
+    s1h.appendChild(mk('span','rpt-section-ico','🧪'));
+    s1h.appendChild(mk('span','rpt-section-title','Suelo y Fertilizantes'));
+    s1h.appendChild(mk('span','rpt-section-badge rbadge '+(phOk?'lo':'med'),phOk?'Suelo en orden':'Revisar pH'));
+    s1.appendChild(s1h);
+    var s1b=mk('div','rpt-section-body');
+    var phRow=mk('div','rpt-metric-row');
+    phRow.appendChild(mk('span','rpt-metric-label','Nivel de acidez (pH)'));
+    var phVal=mk('span','rpt-metric-val',String(ph));phVal.style.color=phOk?'var(--green3)':'var(--amber)';phRow.appendChild(phVal);
+    var phWrap=mk('div','rpt-metric');phWrap.appendChild(phRow);
+    var phExp=mk('div','rpt-explicacion'+(phOk?'':' amber'));
+    var phTxt='Su nivel de acidez (pH) es de <b>'+ph+'</b>, el cual es <b>'+(phOk?'adecuado':'fuera del rango ideal')+'</b> para '+c.nombre+' (rango óptimo: '+phId.min+'–'+phId.max+'). ';
+    if(phOk){
+      phTxt+='El suelo está en buenas condiciones para que las raíces absorban los nutrientes de la tierra de forma eficiente. Le sugerimos aplicar el fertilizante recomendado solo para mantener la fuerza de la tierra y asegurar el rendimiento.';
+    } else if(ph<phId.min){
+      phTxt+='El suelo está algo ácido. Esto puede dificultar que sus '+c.nombre+' aprovechen bien el abono que aplique. Le recomendamos agregar <b>cal agrícola</b> (aprox. '+Math.round((phId.min-ph)*2000*z.ha)+' kg) para corregirlo antes de sembrar o fertilizar.';
+    } else {
+      phTxt+='El suelo está algo alcalino. Esto puede dificultar la absorción de ciertos minerales. Le recomendamos agregar <b>azufre elemental</b> (aprox. '+Math.round((ph-phId.max)*1500*z.ha)+' kg) para corregirlo.';
+    }
+    phExp.innerHTML=phTxt;
+    phWrap.appendChild(phExp);
+    s1b.appendChild(phWrap);
+    s1b.appendChild(mk('div','rpt-divider'));
+    // NPK
+    var npkExp=mk('div','rpt-explicacion');
+    npkExp.innerHTML='Para sus <b>'+z.ha.toFixed(1)+' ha</b> de '+c.nombre+', los fertilizantes recomendados son: Nitrógeno <b>'+clp(Math.round(c.npk.N*z.ha))+' kg</b>, Fósforo <b>'+clp(Math.round(c.npk.P*z.ha))+' kg</b>, Potasio <b>'+clp(Math.round(c.npk.K*z.ha))+' kg</b>. Puede conseguirlos en su agroferretería local; no es necesario comprar todo de una vez — aplíquelos en etapas según el ciclo del cultivo.';
+    s1b.appendChild(npkExp);
+    s1.appendChild(s1b);
+    body.appendChild(s1);
+
+    // ── SUGERENCIA DE CULTIVOS ALTERNATIVOS ──
+    (function(){
+      var altKeys;
+      if(ph<5.8){
+        altKeys=['arandano','avena'];
+      } else if(ph<=7.0){
+        altKeys=['manzana','naranja'];
+        // Si alguna de las sugeridas es el cultivo activo, cambiar por cerezas
+        altKeys=altKeys.map(function(k){return k===z.cultivo?'cerezas':k;});
+      } else {
+        altKeys=['ajo','cebolla'];
+      }
+      // Filtrar el cultivo actual en caso de que siga apareciendo
+      altKeys=altKeys.filter(function(k){return k!==z.cultivo;});
+      // Garantizar 2 opciones distintas
+      if(altKeys.length<2){
+        var fallbacks=['trigo','avena','maiz','papa','tomate','lechuga'];
+        for(var fi=0;fi<fallbacks.length&&altKeys.length<2;fi++){
+          if(fallbacks[fi]!==z.cultivo&&altKeys.indexOf(fallbacks[fi])===-1) altKeys.push(fallbacks[fi]);
+        }
+      }
+      var nombre1=(CULTIVOS[altKeys[0]]&&CULTIVOS[altKeys[0]].nombre)||altKeys[0];
+      var nombre2=(CULTIVOS[altKeys[1]]&&CULTIVOS[altKeys[1]].nombre)||altKeys[1];
+      var ico1=(CULTIVOS[altKeys[0]]&&CULTIVOS[altKeys[0]].ico)||'🌱';
+      var ico2=(CULTIVOS[altKeys[1]]&&CULTIVOS[altKeys[1]].ico)||'🌱';
+
+      var sAlt=mk('div','rpt-section');
+      var sAltH=mk('div','rpt-section-header');
+      sAltH.appendChild(mk('span','rpt-section-ico','💡'));
+      sAltH.appendChild(mk('span','rpt-section-title','Idea para su Terreno'));
+      sAltH.appendChild(mk('span','rpt-section-badge rbadge lo','Alternativas'));
+      sAlt.appendChild(sAltH);
+      var sAltB=mk('div','rpt-section-body');
+      var altExp=mk('div','rpt-explicacion');
+      altExp.innerHTML='🌱 <b>Idea para su terreno:</b> Basándonos en la acidez de su suelo (pH de <b>'+ph+'</b>), este terreno también tiene el potencial para sembrar <b>'+ico1+' '+nombre1+'</b> y <b>'+ico2+' '+nombre2+'</b>. Considérelas como una excelente opción si en el futuro desea probar alternativas, aprovechar mejor la tierra o rotar sus cultivos.';
+      sAltB.appendChild(altExp);
+      sAlt.appendChild(sAltB);
+      body.appendChild(sAlt);
+    })();
+
+    // ── SECCIÓN 2: SALUD Y PLAGAS (INTEGRADO) ──
+    var s2=mk('div','rpt-section');
+    var s2h=mk('div','rpt-section-header');
+    s2h.appendChild(mk('span','rpt-section-ico','🌿'));
+    s2h.appendChild(mk('span','rpt-section-title','Salud del Cultivo y Plagas'));
+    s2h.appendChild(mk('span','rpt-section-badge rbadge '+rcls,'Riesgo '+d.riesgo));
+    s2.appendChild(s2h);
+    var s2b=mk('div','rpt-section-body');
+    // NDVI
+    var ndviRow=mk('div','rpt-metric-row');
+    ndviRow.appendChild(mk('span','rpt-metric-label','Índice de salud (NDVI)'));
+    var ndviVal=mk('span','rpt-metric-val',d.na.toFixed(2));ndviVal.style.color=d.na>0.6?'var(--green3)':d.na>0.4?'var(--amber)':'var(--red)';ndviRow.appendChild(ndviVal);
+    var ndviWrap=mk('div','rpt-metric');ndviWrap.appendChild(ndviRow);
+    var ndviExp=mk('div','rpt-explicacion'+(d.riesgo==='BAJO'?'':d.riesgo==='MEDIO'?' amber':' danger'));
+    ndviExp.style.borderColor=d.riesgo==='BAJO'?'':'';
+    var ndviTxt='';
+    if(d.riesgo==='BAJO'){
+      ndviTxt='Sus '+c.nombre+' se ven en buen estado según las imágenes satelitales. La pérdida estimada de producción es de solo un <b>'+d.merma.toFixed(0)+'%</b>, lo que es normal. No se requieren acciones urgentes.';
+    } else if(d.riesgo==='MEDIO'){
+      ndviTxt='Hay señales de algo de estrés en sus plantas. Se estima una pérdida de <b>'+d.merma.toFixed(0)+'%</b> de su producción (unos <b>'+clp(Math.round(d.kperd))+' kg</b>). Le conviene revisar si el riego está llegando bien a todas las plantas.';
+    } else {
+      ndviTxt='Las imágenes muestran estrés importante en sus plantas. Si no actúa pronto, podría perder cerca de <b>'+clp(Math.round(d.kperd))+' kg</b> (<b>'+d.merma.toFixed(0)+'%</b> de su cosecha). Le recomendamos revisar el riego y consultar con un técnico agrícola local.';
+    }
+    ndviExp.innerHTML=ndviTxt;
+    ndviWrap.appendChild(ndviExp);
+    s2b.appendChild(ndviWrap);
+    s2b.appendChild(mk('div','rpt-divider'));
+    // Plagas
+    var plagaExp=mk('div','rpt-explicacion amber');
+    plagaExp.innerHTML='<b>⚠ Atención con las plagas:</b> Durante los meses críticos de <b>'+plagaInfo.m.join(', ')+'</b>, existe riesgo de aparición de <b>'+c.plaga+'</b>. Si no se controla a tiempo, esta plaga puede arruinar gran parte de su inversión. Le sugerimos visitar su agroferretería local pronto para cotizar repelentes o tratamientos preventivos. El costo estimado de control fitosanitario para su terreno es de <b>$'+clp(costoPlaga)+'</b> por temporada.';
+    s2b.appendChild(plagaExp);
+    s2.appendChild(s2b);
+    body.appendChild(s2);
+
+    // ── SECCIÓN 3: CLIMA Y AGUA ──
+    var s3=mk('div','rpt-section');
+    var s3h=mk('div','rpt-section-header');
+    s3h.appendChild(mk('span','rpt-section-ico','🌤'));
+    s3h.appendChild(mk('span','rpt-section-title','Clima y Agua'));
+    var rcClsBadge=d.rc>60?'hi':d.rc>35?'med':'lo';
+    s3h.appendChild(mk('span','rpt-section-badge rbadge '+rcClsBadge,'Riesgo climático '+d.rc+'%'));
+    s3.appendChild(s3h);
+    var s3b=mk('div','rpt-section-body');
+    // Riesgo clima extremo
+    var climaExp=mk('div','rpt-explicacion'+(d.rc>35?' amber':''));
+    climaExp.innerHTML='Existe un <b>'+d.rc+'%</b> de probabilidad de enfrentar condiciones climáticas difíciles esta temporada (como heladas, sequía o lluvias fuera de ciclo). En términos prácticos, esto significa que aproximadamente <b>'+Math.round(d.rc/33)+' de cada 3 años</b> puede ser complicado en su zona.'+(z.lat<-38?' <b>Su zona tiene riesgo de heladas tardías</b>; esté atento a las noches frías durante los meses de floración.':'');
+    s3b.appendChild(climaExp);
+    s3b.appendChild(mk('div','rpt-divider'));
+    // Agua
+    var aguaRow=mk('div','rpt-metric-row');
+    aguaRow.appendChild(mk('span','rpt-metric-label','Agua total (120 días)'));
+    var aguaVal=mk('span','rpt-metric-val',clp(m3t)+' m\u00B3');aguaVal.style.color='var(--blue)';aguaRow.appendChild(aguaVal);
+    var aguaWrap=mk('div','rpt-metric');aguaWrap.appendChild(aguaRow);
+    var aguaExp=mk('div','rpt-explicacion blue');
+    aguaExp.innerHTML='Va a necesitar aproximadamente <b>'+clp(m3t)+' m\u00B3 de agua</b> para el total de la temporada (120 días). Si no cuenta con pozo o derechos de agua de canal, le recomendamos empezar a cotizar camiones aljibe con tiempo. El costo estimado de agua agrícola para su terreno en la Región '+reg+' es de <b>$'+clp(cAgua)+'</b> (a $'+clp(tarifa)+'/m\u00B3).';
+    aguaWrap.appendChild(aguaExp);
+    s3b.appendChild(aguaWrap);
+    s3.appendChild(s3b);
+    body.appendChild(s3);
+
+    // ── SECCIÓN 4: ECONÓMICO ──
+    var s4=mk('div','rpt-section');
+    var s4h=mk('div','rpt-section-header');
+    s4h.appendChild(mk('span','rpt-section-ico','💰'));
+    s4h.appendChild(mk('span','rpt-section-title','Proyección Económica'));
+    s4h.appendChild(mk('span','rpt-section-badge rbadge '+(roiV>1?'lo':roiV>0?'med':'hi'),roiV>1?'Rentable':'Revisar costos'));
+    s4.appendChild(s4h);
+    var s4b=mk('div','rpt-section-body');
+    // Resumen costos
+    var costoExp=mk('div','rpt-explicacion');
+    costoExp.innerHTML='Considerando los costos principales (semilla/plántulas, riego, agua y control de plagas), el total estimado de inversión para su predio es de <b>$'+clp(totalCostos)+'</b>. El ingreso potencial por su cosecha de '+c.nombre+' es de aproximadamente <b>$'+clp(Math.round(d.kp*precioActual))+'</b> (precio referencia $'+clp(precioActual)+'/kg).';
+    s4b.appendChild(costoExp);
+    s4b.appendChild(mk('div','rpt-divider'));
+    // ROI en lenguaje simple
+    var roiRow=mk('div','rpt-metric-row');
+    roiRow.appendChild(mk('span','rpt-metric-label','Por cada $1.000 invertidos'));
+    var roiVal=mk('span','rpt-metric-val','$'+clp(Math.max(0,roiPor1000)));roiVal.style.color=roiV>1?'var(--green3)':roiV>0?'var(--amber)':'var(--red)';roiRow.appendChild(roiVal);
+    var roiWrap=mk('div','rpt-metric');roiWrap.appendChild(roiRow);
+    var roiExp=mk('div','rpt-explicacion'+(roiV<=0?' amber':''));
+    var roiTxt='';
+    if(roiV>1){
+      roiTxt='Considerando los costos seleccionados (semillas, agua, riego y control de plagas), por cada <b>$1.000 que invierta</b>, podría recuperar <b>$'+clp(roiPor1000)+'</b>. Esto indica que la actividad es rentable en las condiciones actuales.';
+    } else if(roiV>0){
+      roiTxt='Por cada <b>$1.000 que invierta</b>, podría recuperar <b>$'+clp(roiPor1000)+'</b>. El margen es ajustado; buscar un canal de venta con mejor precio puede marcar la diferencia.';
+    } else {
+      roiTxt='Con los costos actuales, la proyección muestra números difíciles. Le recomendamos revisar los costos en el panel lateral y considerar reducir la cantidad de plantas para empezar con una inversión menor.';
+    }
+    roiExp.innerHTML=roiTxt;
+    roiWrap.appendChild(roiExp);
+    s4b.appendChild(roiWrap);
+    s4b.appendChild(mk('div','rpt-divider'));
+    // Consejo de simulación
+    var consejoExp=mk('div','rpt-explicacion');
+    consejoExp.innerHTML='💡 <b>Consejo de inicio:</b> Este cálculo usa la cantidad estándar de plantas para el terreno (<b>'+clp(Math.round(densV*z.ha))+' '+psUnit+'s</b>). Si quiere ajustar su presupuesto o sembrar menos para probar, cierre este reporte, cambie la cantidad de plantas en la pestaña <b>Campo</b> de su menú lateral, y vuelva a abrir el reporte para ver cómo disminuyen sus costos.';
+    s4b.appendChild(consejoExp);
+    s4.appendChild(s4b);
+    body.appendChild(s4);
+
+    // ── SECCIÓN 5: CULTIVOS RECOMENDADOS ──
+    var s5=mk('div','rpt-section');
+    var s5h=mk('div','rpt-section-header');
+    s5h.appendChild(mk('span','rpt-section-ico','🌟'));
+    s5h.appendChild(mk('span','rpt-section-title','Cultivos Recomendados para tu Zona'));
+    s5.appendChild(s5h);
+    var s5b=mk('div','rpt-section-body');
+    var introRec=mk('div','rpt-explicacion');
+    introRec.innerHTML='Basándonos en la latitud de tu predio (<b>'+z.lat.toFixed(2)+'°S · Región '+getRegion(z.lat)+'</b>), el pH del suelo estimado y el clima local, estos son los cultivos con mayor potencial productivo y comercial para tu zona:';
+    s5b.appendChild(introRec);
+    var recs2=getCultivoRecomendaciones(z);
+    recs2.forEach(function(r,i){
+      var rDiv=mk('div','');
+      rDiv.style.cssText='display:flex;align-items:flex-start;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)';
+      if(i===recs2.length-1) rDiv.style.borderBottom='none';
+      var scoreColor=r.score>=90?'var(--green3)':r.score>=80?'var(--amber)':'var(--text2)';
+      var left=mk('div','');left.style.cssText='display:flex;flex-direction:column;align-items:center;gap:4px;width:52px;flex-shrink:0';
+      var icoEl=mk('div','');icoEl.style.cssText='font-size:28px;line-height:1';icoEl.textContent=r.ico;
+      var scoreEl=mk('div','');scoreEl.style.cssText='font-size:12px;font-weight:700;color:'+scoreColor;scoreEl.textContent=r.score+'%';
+      var medalEl=mk('div','');medalEl.style.cssText='font-size:14px';medalEl.textContent=['🥇','🥈','🥉','4°'][i]||'';
+      left.appendChild(icoEl);left.appendChild(scoreEl);left.appendChild(medalEl);
+      var right=mk('div','');right.style.flex='1';
+      var nameEl=mk('div','');nameEl.style.cssText='font-family:Syne,sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px';nameEl.textContent=r.nombre;
+      var razonEl=mk('div','rpt-explicacion'+(r.score<80?' amber':''));
+      razonEl.style.marginBottom='0';razonEl.textContent=r.razon;
+      right.appendChild(nameEl);right.appendChild(razonEl);
+      rDiv.appendChild(left);rDiv.appendChild(right);
+      s5b.appendChild(rDiv);
+    });
+    // Nota si cultivo actual no es el top
+    if(recs2.length>0&&recs2[0].nombre!==c.nombre){
+      var notaRec=mk('div','rpt-explicacion amber');
+      notaRec.style.marginTop='10px';
+      notaRec.innerHTML='💡 <b>Nota:</b> Tu cultivo actual (<b>'+c.nombre+'</b>) no es el de mayor puntuación para esta zona. Si estás planificando la próxima temporada, te recomendamos evaluar <b>'+recs2[0].nombre+'</b> que tiene mayor adaptación a las condiciones locales.';
+      s5b.appendChild(notaRec);
+    } else if(recs2.length>0){
+      var notaOk=mk('div','rpt-explicacion');
+      notaOk.style.marginTop='10px';
+      notaOk.innerHTML='✅ <b>¡Excelente elección!</b> Tu cultivo actual (<b>'+c.nombre+'</b>) es el más recomendado para las condiciones de tu zona.';
+      s5b.appendChild(notaOk);
+    }
+    s5.appendChild(s5b);
+    body.appendChild(s5);
+  }
+
+  // Botón abrir reporte
+  document.getElementById('btn-reporte').addEventListener('click',function(){
+    var z=zones.find(function(x){return x.id===activeZone;});
+    if(!z) return;
+    generarReporte();
+    document.getElementById('reporte-overlay').classList.add('show');
+  });
+
+  // Botón cerrar reporte
+  document.getElementById('btn-reporte-close').addEventListener('click',function(){
+    document.getElementById('reporte-overlay').classList.remove('show');
+  });
+
+  // Cerrar al hacer clic en el overlay (fuera del box)
+  document.getElementById('reporte-overlay').addEventListener('click',function(e){
+    if(e.target===this) this.classList.remove('show');
+  });
+
+  // Mostrar/ocultar botón de reporte según si hay zona activa
+  // Hacemos override de selectZone para mostrar el botón
+  var _origSelectZone=selectZone;
+  window.selectZone=function(id){
+    _origSelectZone(id);
+    document.getElementById('btn-reporte').style.display=id?'block':'none';
+  };
 });
 </script>
 </body>
