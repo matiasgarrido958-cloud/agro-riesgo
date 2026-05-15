@@ -716,8 +716,17 @@ function buildClima(d,zona){
   var rd=+(et0n*.85*10*zona.ha).toFixed(0),rs=+(et0n*.85*10*zona.ha*7).toFixed(0),rt=Math.round(et0n*.85*10*zona.ha*120);
   div.appendChild(secTitle('🌡 Condiciones Actuales'));
   var wc=card('Open-Meteo en tiempo real');
-  [['🌡','Temperatura actual',tAct+'°C'],['🔼','Máxima del día',tMax+'°C'],['🔽','Mínima',tMin+'°C'],['🌧','Precipitación',pp+' mm'],['💨','Viento máx.',viento+' km/h'],['💧','Evapotranspiración ET₀',et0v+' mm/día']].forEach(function(r){
-    var wr=mk('div','wx-row');wr.appendChild(mk('span','wx-ico',r[0]));wr.appendChild(mk('span','wx-label',r[1]));wr.appendChild(mk('span','wx-val',r[2]));wc.appendChild(wr);});
+  if(!cl){
+    // Aún cargando: mostrar spinner dentro de la card
+    var ldRow=mk('div','');ldRow.style.cssText='display:flex;align-items:center;gap:10px;padding:10px 4px;';
+    var sp=mk('div','ld');sp.style.cssText='width:16px;height:16px;border-width:2px;flex-shrink:0';
+    var lt=mk('span','','Obteniendo datos en tiempo real...');lt.style.cssText='font-size:12px;color:var(--text3)';
+    ldRow.appendChild(sp);ldRow.appendChild(lt);
+    wc.appendChild(ldRow);
+  } else {
+    [['🌡','Temperatura actual',tAct+'°C'],['🔼','Máxima del día',tMax+'°C'],['🔽','Mínima',tMin+'°C'],['🌧','Precipitación',pp+' mm'],['💨','Viento máx.',viento+' km/h'],['💧','Evapotranspiración ET₀',et0v+' mm/día']].forEach(function(r){
+      var wr=mk('div','wx-row');wr.appendChild(mk('span','wx-ico',r[0]));wr.appendChild(mk('span','wx-label',r[1]));wr.appendChild(mk('span','wx-val',r[2]));wc.appendChild(wr);});
+  }
   div.appendChild(wc);
   div.appendChild(secTitle('💧 Plan de Riego'));
   var rc=card('Consumo para '+zona.ha.toFixed(1)+' ha');rc.appendChild(row('Consumo diario',rd+' m\u00B3/d\u00EDa','b'));rc.appendChild(row('Consumo semanal',rs+' m\u00B3/semana','b'));rc.appendChild(row('Total temporada (120 d\u00EDas)',clp(rt)+' m\u00B3','b'));div.appendChild(rc);
@@ -1112,6 +1121,8 @@ function selectZone(id){
   var keyS=z.lat.toFixed(2)+'_'+z.lng.toFixed(2);
   var sueloZ=sueloCache[keyS]||getSueloDefault(z.lat);
   if(sueloZ&&sueloZ.ph) document.getElementById('st-suelo').textContent=sueloZ.ph;
+  // Disparar fetch de clima si no está cacheado — el callback re-renderizará la pestaña automáticamente
+  if(typeof fetchClima==='function'&&!climaCache[keyS]) fetchClima(z.lat,z.lng);
   renderZona(z);
 }
 window.selectZone=selectZone;
@@ -1369,12 +1380,36 @@ window.addEventListener('load',function(){
   function calcArea(pts){var R=6371000,n=pts.length,area=0;for(var i=0;i<n;i++){var j=(i+1)%n;area+=(pts[j].lng-pts[i].lng)*Math.PI/180*(Math.sin(pts[j].lat*Math.PI/180)+Math.sin(pts[i].lat*Math.PI/180));}return Math.abs(area/2)*R*R;}
 
   // CLIMA
-  function fetchClima(lat,lng){
-    var key=lat.toFixed(2)+'_'+lng.toFixed(2);if(climaCache[key]){updateCl(climaCache[key]);return;}
+  var climaPending={};  // keys en vuelo para no repetir fetches
+
+  function fetchClima(lat,lng,cb){
+    var key=lat.toFixed(2)+'_'+lng.toFixed(2);
+    if(climaCache[key]){updateCl(climaCache[key]);if(cb)cb(climaCache[key]);return;}
+    if(climaPending[key]){if(cb){var prev=climaPending[key];climaPending[key]=function(d){prev(d);cb(d);}}return;}
+    climaPending[key]=cb||function(){};
     fetch('https://api.open-meteo.com/v1/forecast?latitude='+lat+'&longitude='+lng+'&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,et0_fao_evapotranspiration,windspeed_10m_max&current_weather=true&timezone=America%2FSantiago&forecast_days=7')
-      .then(function(r){return r.json();}).then(function(d){climaCache[key]=d;updateCl(d);}).catch(function(){});
+      .then(function(r){return r.json();})
+      .then(function(d){
+        climaCache[key]=d;
+        var fn=climaPending[key];delete climaPending[key];
+        updateCl(d);
+        if(fn)fn(d);
+        // Re-renderizar la pestaña clima si la zona activa coincide con esta key
+        var az=zones.find(function(z){return z.id===activeZone;});
+        if(az&&az.lat.toFixed(2)+'_'+az.lng.toFixed(2)===key){
+          var tabClima=document.getElementById('tab-clima');
+          if(tabClima){
+            var azData=generarDatos(az);
+            var newClima=buildClima(azData,az);
+            newClima.id='tab-clima';
+            newClima.style.display=tabClima.style.display;
+            tabClima.parentNode.replaceChild(newClima,tabClima);
+          }
+        }
+      })
+      .catch(function(){delete climaPending[key];});
   }
-  function updateCl(d){if(d&&d.current_weather){var wc=['☀','⛅','🌧','🌨','⛈'];var ico=d.current_weather.weathercode===0?'☀':d.current_weather.weathercode<=3?'⛅':d.current_weather.weathercode<=67?'🌧':'⛈';document.getElementById('st-clima').textContent=ico+' '+d.current_weather.temperature+'°C';}}
+  function updateCl(d){if(d&&d.current_weather){var ico=d.current_weather.weathercode===0?'☀':d.current_weather.weathercode<=3?'⛅':d.current_weather.weathercode<=67?'🌧':'⛈';document.getElementById('st-clima').textContent=ico+' '+d.current_weather.temperature+'°C';}}
 
   // SUELO
   function fetchSuelo(lat,lng,cb){
