@@ -1872,7 +1872,7 @@ function buildEco(d,zona){
   // Agregar semilla/plántulas según tipo de cultivo
   var psUnit2=c.ps_unit||'kg';
   var densV2=densidadOverride[zona.id+'_densidad']||c.densidad_semilla_default;
-  if(psUnit2==='planta'){
+  if(psUnit2==='planta' || psUnit2==='semilla/bandeja' || c.densidad_semilla_unit==='plantas/ha'){
     var nPlantas=Math.round(densV2*zona.ha);
     var cPlanta=Math.round(nPlantas*(c.ps||0));
     costos.splice(2,0,{id:'c_planta',lbl:'🌿 Plántulas (por unidad)',val:cPlanta,checked:true,
